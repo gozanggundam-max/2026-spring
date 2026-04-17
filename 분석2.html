@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>모(毛)니터링: 섹터별 정밀 분석기</title>
+    <style>
+        :root { --danger: #e74c3c; --warning: #f1c40f; --success: #2ecc71; --dark: #2c3e50; }
+        body { font-family: 'Pretendard', sans-serif; background: #f4f7f6; display: flex; justify-content: center; padding: 40px; }
+        .app-container { background: white; width: 700px; padding: 40px; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+        h1 { font-size: 24px; color: var(--dark); border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 30px; }
+        
+        .section-title { font-size: 18px; font-weight: bold; color: var(--dark); margin: 25px 0 15px; display: flex; align-items: center; }
+        .section-title::before { content: ''; width: 4px; height: 18px; background: var(--dark); margin-right: 10px; border-radius: 2px; }
+
+        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .input-group { display: flex; flex-direction: column; }
+        label { font-size: 13px; color: #7f8c8d; margin-bottom: 8px; }
+        input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; transition: 0.3s; }
+        input:focus { border-color: var(--dark); outline: none; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+
+        .result-card { background: #f8f9fa; padding: 25px; border-radius: 16px; margin-top: 30px; }
+        .risk-indicator { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-radius: 10px; margin-bottom: 10px; font-weight: bold; color: white; transition: 0.5s; }
+        
+        .risk-safe { background-color: var(--success); }
+        .risk-warning { background-color: var(--warning); color: #333; }
+        .risk-danger { background-color: var(--danger); }
+
+        .desc { font-size: 14px; color: #666; margin-top: 10px; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <h1>탈모 섹터별 정밀 분석 (Sector Analysis)</h1>
+
+    <div class="section-title">후퇴도 분석 (Hairline Recession)</div>
+    <div class="input-grid">
+        <div class="input-group">
+            <label>앞머리 라인 후퇴 (mm)</label>
+            <input type="number" id="front-line" placeholder="예: 0.2" step="0.1" oninput="calculateRisk()">
+        </div>
+        <div class="input-group">
+            <label>좌측 M자 라인 후퇴 (mm)</label>
+            <input type="number" id="left-m" placeholder="예: 0.5" step="0.1" oninput="calculateRisk()">
+        </div>
+        <div class="input-group">
+            <label>우측 M자 라인 후퇴 (mm)</label>
+            <input type="number" id="right-m" placeholder="예: 0.5" step="0.1" oninput="calculateRisk()">
+        </div>
+    </div>
+
+    <div class="section-title">밀집도 분석 (Crown Density)</div>
+    <div class="input-grid">
+        <div class="input-group">
+            <label>정수리 모발 밀도 (개/cm²)</label>
+            <input type="number" id="crown-density" placeholder="평균 약 150-200" oninput="calculateRisk()">
+        </div>
+    </div>
+
+    <div class="result-card">
+        <div id="recession-risk" class="risk-indicator risk-safe">
+            <span>후퇴 위험도</span>
+            <span id="recession-status">데이터 입력 대기 중</span>
+        </div>
+        <div id="density-risk" class="risk-indicator risk-safe">
+            <span>밀집 위험도</span>
+            <span id="density-status">데이터 입력 대기 중</span>
+        </div>
+        <p class="desc">※ 본 분석은 사용자가 입력한 시계열 데이터를 바탕으로 도출된 <strong>통계적 위험 지표</strong>입니다.</p>
+    </div>
+</div>
+
+<script>
+    function calculateRisk() {
+        // 후퇴도 계산
+        const f = parseFloat(document.getElementById('front-line').value) || 0;
+        const l = parseFloat(document.getElementById('left-m').value) || 0;
+        const r = parseFloat(document.getElementById('right-m').value) || 0;
+        const maxRecession = Math.max(f, l, r);
+
+        const recElem = document.getElementById('recession-risk');
+        const recStat = document.getElementById('recession-status');
+
+        if (maxRecession === 0) {
+            recStat.innerText = "양호";
+            recElem.className = "risk-indicator risk-safe";
+        } else if (maxRecession < 0.3) {
+            recStat.innerText = "주의 (초기 관리 권장)";
+            recElem.className = "risk-indicator risk-warning";
+        } else {
+            recStat.innerText = "위험 (정밀 진단 필요)";
+            recElem.className = "risk-indicator risk-danger";
+        }
+
+        // 밀집도 계산
+        const d = parseFloat(document.getElementById('crown-density').value);
+        const denElem = document.getElementById('density-risk');
+        const denStat = document.getElementById('density-status');
+
+        if (!d) {
+            denStat.innerText = "데이터 입력 대기 중";
+            denElem.className = "risk-indicator risk-safe";
+        } else if (d >= 140) {
+            denStat.innerText = "정상";
+            denElem.className = "risk-indicator risk-safe";
+        } else if (d >= 100) {
+            denStat.innerText = "밀도 감소 (영양 공급 필요)";
+            denElem.className = "risk-indicator risk-warning";
+        } else {
+            denStat.innerText = "희박 (집중 치료 단계)";
+            denElem.className = "risk-indicator risk-danger";
+        }
+    }
+</script>
+
+</body>
+</html>
