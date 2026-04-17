@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>모(毛)니터링 - 탈모 추적 대시보드</title>
+    <style>
+        body { font-family: 'Pretendard', sans-serif; background: #f4f7f6; color: #333; display: flex; justify-content: center; padding: 40px; }
+        .container { background: white; width: 600px; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; font-size: 24px; border-left: 5px solid #27ae60; padding-left: 10px; }
+        .comparison { display: flex; gap: 10px; margin-top: 20px; position: relative; }
+        .photo-card { flex: 1; text-align: center; }
+        .photo-card img { width: 100%; border-radius: 10px; border: 2px solid #eee; }
+        .badge { background: #e74c3c; color: white; padding: 5px 10px; border-radius: 5px; font-size: 12px; font-weight: bold; }
+        .result-box { background: #f8f9fa; margin-top: 25px; padding: 20px; border-radius: 15px; border: 1px dashed #bdc3c7; }
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .btn { background: #27ae60; color: white; border: none; width: 100%; padding: 15px; border-radius: 10px; font-size: 16px; cursor: pointer; margin-top: 15px; }
+        .btn:hover { background: #219150; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>모(毛)니터링 리포트 <small style="font-size: 14px; color: #7f8c8d;">| 2026.04</small></h1>
+    <p>의사의 주관이 아닌 <strong>0.01mm의 데이터</strong>로 증명합니다.</p>
+
+    <div class="comparison">
+        <div class="photo-card">
+            <span class="badge">2개월 전</span>
+            <img src="https://via.placeholder.com/250x300/eee/999?text=Past+Scan" alt="과거">
+            <p>2026.02.17</p>
+        </div>
+        <div class="photo-card">
+            <span class="badge" style="background:#3498db;">현재</span>
+            <img src="https://via.placeholder.com/250x300/ddd/666?text=Current+Scan" alt="현재">
+            <p>2026.04.17</p>
+        </div>
+    </div>
+
+    <div class="result-box">
+        <div class="stat-row">
+            <span>헤어라인 후퇴</span>
+            <strong>+ 0.32mm</strong>
+        </div>
+        <div class="stat-row">
+            <span>모발 밀도 변화</span>
+            <span style="color:#e74c3c;">- 4.2% 감소</span>
+        </div>
+        <hr>
+        <p style="font-size: 14px; color: #666;">💡 <strong>분석 결과:</strong> 현재 후퇴 속도가 평균 대비 1.2배 빠릅니다. 정기적인 관리가 필요한 시점입니다.</p>
+    </div>
+
+    <button class="btn">맞춤형 관리 솔루션 확인하기</button>
+</div>
+
+</body>
+</html>
