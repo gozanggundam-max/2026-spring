@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>모(毛)니터링: 데이터 정밀 분석 대시보드</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { --danger: #ff4d4d; --safe: #2ecc71; --bg: #f0f2f5; }
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg); display: flex; justify-content: center; padding: 20px; }
+        .dashboard { background: white; width: 850px; border-radius: 24px; padding: 40px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f0f0f0; padding-bottom: 20px; margin-bottom: 30px; }
+        .status-badge { background: #fff5f5; color: var(--danger); padding: 8px 16px; border-radius: 30px; font-weight: bold; border: 1px solid var(--danger); }
+        
+        .grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px; }
+        .chart-container { background: #fff; padding: 20px; border-radius: 16px; border: 1px solid #eee; }
+        
+        .stats-panel { display: flex; flex-direction: column; gap: 20px; }
+        .stat-card { background: #f8f9fa; padding: 20px; border-radius: 16px; border-left: 6px solid var(--danger); }
+        .stat-card h3 { margin: 0; font-size: 14px; color: #666; }
+        .stat-card .value { font-size: 28px; font-weight: 800; color: #222; margin-top: 5px; }
+        
+        .analysis-text { line-height: 1.6; color: #444; background: #fff9f0; padding: 15px; border-radius: 12px; font-size: 14px; }
+        .btn-group { margin-top: 30px; display: flex; gap: 10px; }
+        .btn { flex: 1; padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-primary { background: #222; color: white; }
+        .btn-secondary { background: #e0e0e0; color: #444; }
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+    <div class="header">
+        <div>
+            <h1 style="margin:0; font-size: 26px;">Hairline Analysis Report</h1>
+            <p style="color:#888; margin:5px 0 0 0;">분석 ID: #KU-2026-0417</p>
+        </div>
+        <div class="status-badge">주의: 후퇴 진행 중</div>
+    </div>
+
+    <div class="grid">
+        <div class="chart-container">
+            <h3 style="margin-top:0;">헤어라인 변화 대조 (Past vs Current)</h3>
+            <canvas id="hairlineChart"></canvas>
+            <p style="font-size: 12px; color: #999; text-align: center; margin-top: 15px;">* X축: 이마 가로 폭(cm) / Y축: 기준점으로부터의 높이(cm)</p>
+        </div>
+
+        <div class="stats-panel">
+            <div class="stat-card">
+                <h3>평균 후퇴 거리</h3>
+                <div class="value">0.35 mm</div>
+            </div>
+            <div class="stat-card" style="border-left-color: #e67e22;">
+                <h3>M자 부위 최대 후퇴</h3>
+                <div class="value">0.52 mm</div>
+            </div>
+            <div class="analysis-text">
+                <strong>💡 AI 분석 결과:</strong><br>
+                현재 M자 부위(양측 끝)의 탈모 속도가 중앙부보다 <strong>2.4배</strong> 빠르게 나타나고 있습니다. 지난 8주간의 데이터 수용 결과, 유의미한 라인 변화가 감지되었습니다.
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary">맞춤 케어 시작하기</button>
+                <button class="btn btn-secondary">리포트 공유</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const ctx = document.getElementById('hairlineChart').getContext('2d');
+    
+    // 데이터 설정 (아까 Python으로 계산했던 로직을 JS 배열로 재현)
+    const labels = Array.from({length: 20}, (_, i) => (i - 10) * 0.5);
+    const pastData = labels.map(x => 0.2 * Math.pow(x, 2) + 5);
+    const currentData = pastData.map((y, i) => {
+        let recession = 0.35; // 평균 후퇴
+        if (Math.abs(labels[i]) > 2.5) recession += 0.17; // M자 부위 추가 후퇴
+        return y + recession;
+    });
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: '현재 상태',
+                    data: currentData,
+                    borderColor: '#ff4d4d',
+                    backgroundColor: 'rgba(255, 77, 77, 0.2)',
+                    fill: true,
+                    tension: 0.4
+                },
+                {
+                    label: '2개월 전',
+                    data: pastData,
+                    borderColor: '#2ecc71',
+                    borderDash: [5, 5],
+                    fill: false,
+                    tension: 0.4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { min: 4, max: 10, title: { display: true, text: '거리 (cm)' } },
+                x: { title: { display: true, text: '이마 가로축' } }
+            },
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
