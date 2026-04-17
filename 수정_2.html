@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>모(毛)니터링: 연령별 상대 위험도 분석</title>
+    <style>
+        :root { --danger: #ff4757; --warning: #ffa502; --success: #2ed573; --dark: #2f3542; --gray: #f1f2f6; }
+        body { font-family: 'Pretendard', sans-serif; background: #f8f9fa; display: flex; justify-content: center; padding: 40px; color: var(--dark); }
+        .app-container { background: white; width: 750px; padding: 40px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.08); }
+        
+        .header { text-align: center; margin-bottom: 40px; }
+        .header h1 { font-size: 28px; margin-bottom: 10px; }
+        .header p { color: #747d8c; }
+
+        .input-section { background: var(--gray); padding: 25px; border-radius: 20px; margin-bottom: 30px; }
+        .input-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        .input-group { display: flex; flex-direction: column; margin-bottom: 15px; }
+        label { font-size: 13px; font-weight: bold; margin-bottom: 8px; color: #57606f; }
+        input { padding: 12px; border: 1px solid #ced4da; border-radius: 10px; font-size: 15px; }
+
+        .result-area { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .analysis-card { border: 2px solid var(--gray); padding: 20px; border-radius: 20px; transition: 0.3s; }
+        .analysis-card h2 { font-size: 16px; margin-top: 0; display: flex; align-items: center; }
+        .analysis-card h2::before { content: '•'; margin-right: 8px; color: #341f97; }
+
+        .comparison-info { font-size: 13px; margin: 15px 0; padding: 10px; background: #fff; border-radius: 10px; line-height: 1.6; }
+        .risk-tag { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-bottom: 10px; }
+        
+        .val-highlight { font-size: 20px; font-weight: 800; }
+        .text-danger { color: var(--danger); }
+        .text-warning { color: var(--warning); }
+        .text-success { color: var(--success); }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header">
+        <h1>개인별 맞춤 탈모 분석 리포트</h1>
+        <p>수치를 입력하면 동년배 평균과 비교 분석합니다.</p>
+    </div>
+
+    <div class="input-section">
+        <div class="input-group" style="width: 100%;">
+            <label>나이 (Age)</label>
+            <input type="number" id="user-age" placeholder="예: 24" oninput="calculateTotalRisk()">
+        </div>
+        <div class="input-grid">
+            <div class="input-group"><label>앞머리 후퇴(mm)</label><input type="number" id="f-line" placeholder="0.0" step="0.1" oninput="calculateTotalRisk()"></div>
+            <div class="input-group"><label>좌M자 후퇴(mm)</label><input type="number" id="l-line" placeholder="0.0" step="0.1" oninput="calculateTotalRisk()"></div>
+            <div class="input-group"><label>우M자 후퇴(mm)</label><input type="number" id="r-line" placeholder="0.0" step="0.1" oninput="calculateTotalRisk()"></div>
+        </div>
+        <div class="input-group" style="margin-bottom: 0;">
+            <label>정수리 밀집도 (n/cm²)</label>
+            <input type="number" id="c-density" placeholder="예: 160" oninput="calculateTotalRisk()">
+        </div>
+    </div>
+
+    <div class="result-area">
+        <div id="card-recession" class="analysis-card">
+            <div id="tag-recession" class="risk-tag" style="background: #eee;">데이터 부족</div>
+            <h2>후퇴 위험도 분석</h2>
+            <div class="val-highlight" id="val-recession">- mm</div>
+            <div class="comparison-info" id="info-recession">
+                연령을 입력하시면 평균 대비 위험도가 산출됩니다.
+            </div>
+        </div>
+
+        <div id="card-density" class="analysis-card">
+            <div id="tag-density" class="risk-tag" style="background: #eee;">데이터 부족</div>
+            <h2>밀집 위험도 분석</h2>
+            <div class="val-highlight" id="val-density">- n/cm²</div>
+            <div class="comparison-info" id="info-density">
+                연령별 평균 모발수와 비교를 시작합니다.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function calculateTotalRisk() {
+        const age = parseInt(document.getElementById('user-age').value);
+        const f = parseFloat(document.getElementById('f-line').value) || 0;
+        const l = parseFloat(document.getElementById('l-line').value) || 0;
+        const r = parseFloat(document.getElementById('r-line').value) || 0;
+        const dens = parseFloat(document.getElementById('c-density').value) || 0;
+
+        if (!age) return;
+
+        // 1. 후퇴 위험도 분석 (연령별 평균 후퇴치 가상 데이터: 나이가 들수록 평균 후퇴 허용치 증가)
+        const avgRecByAge = (age * 0.01).toFixed(2); // 나이가 많을수록 평균 라인이 조금씩 높음
+        const myMaxRec = Math.max(f, l, r);
+        
+        const recCard = document.getElementById('card-recession');
+        const recTag = document.getElementById('tag-recession');
+        const recVal = document.getElementById('val-recession');
+        const recInfo = document.getElementById('info-recession');
+
+        recVal.innerText = myMaxRec + " mm";
+        
+        let recStatus = "";
+        if (myMaxRec <= avgRecByAge) {
+            recStatus = "안전";
+            recTag.style.background = "#2ed573";
+            recTag.style.color = "white";
+            recInfo.innerHTML = `${age}세 평균 후퇴도(${avgRecByAge}mm)보다 낮은 수준입니다. 관리가 아주 잘 되고 있습니다.`;
+        } else if (myMaxRec <= parseFloat(avgRecByAge) + 0.3) {
+            recStatus = "주의";
+            recTag.style.background = "#ffa502";
+            recTag.style.color = "white";
+            recInfo.innerHTML = `${age}세 평균(${avgRecByAge}mm) 대비 <span class="text-warning">0.2mm 이상</span> 초과되었습니다. 집중 관리가 필요합니다.`;
+        } else {
+            recStatus = "경고";
+            recTag.style.background = "#ff4757";
+            recTag.style.color = "white";
+            recInfo.innerHTML = `${age}세 평균 대비 후퇴 속도가 매우 빠릅니다. 전문의 상담을 강력히 권장합니다.`;
+        }
+        recTag.innerText = recStatus;
+
+        // 2. 밀집 위험도 분석 (연령별 평균 밀도 가상 데이터)
+        // 젊을수록 180~200, 나이 들수록 140~160이 평균이라 가정
+        const avgDensByAge = 200 - (age * 0.5); 
+        
+        const denCard = document.getElementById('card-density');
+        const denTag = document.getElementById('tag-density');
+        const denVal = document.getElementById('val-density');
+        const denInfo = document.getElementById('info-density');
+
+        denVal.innerText = dens + " n/cm²";
+
+        let denStatus = "";
+        if (dens === 0) {
+            denTag.innerText = "입력 대기";
+            denTag.style.background = "#eee";
+        } else if (dens >= avgDensByAge) {
+            denStatus = "정상";
+            denTag.style.background = "#2ed573";
+            denTag.style.color = "white";
+            denInfo.innerHTML = `${age}세 기대 밀도(${Math.floor(avgDensByAge)}n) 이상입니다. 모근 건강이 양호합니다.`;
+        } else if (dens >= avgDensByAge - 30) {
+            denStatus = "밀도 저하";
+            denTag.style.background = "#ffa502";
+            denTag.style.color = "white";
+            denInfo.innerHTML = `${age}세 평균(${Math.floor(avgDensByAge)}n)보다 부족합니다. 영양제 섭취를 권장합니다.`;
+        } else {
+            denStatus = "위험";
+            denTag.style.background = "#ff4757";
+            denTag.style.color = "white";
+            denInfo.innerHTML = `동연배 평균 대비 밀도가 <span class="text-danger">20% 이상</span> 낮습니다. 초기 탈모가 진행 중일 수 있습니다.`;
+        }
+        if(dens !== 0) denTag.innerText = denStatus;
+    }
+</script>
+
+</body>
+</html>
